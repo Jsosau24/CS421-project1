@@ -179,9 +179,10 @@ def draw_correction(Image_file, fixations, match_list):
         outline_color = (50, 255, 0, 0)
         
         if match_list[index] == 1:
-        	fill_color = (50, 255, 0, 220)
+            fill_color = (50, 255, 0, 220)
+        
         else:
-        	fill_color = (255, 55, 0, 220)
+            fill_color = (255, 55, 0, 220)
 
         draw.ellipse(bound, fill=fill_color, outline=outline_color)
 
