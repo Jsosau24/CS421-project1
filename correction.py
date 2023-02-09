@@ -50,7 +50,8 @@ def generate_fixations_left_skip_regression(aois_with_tokens):
 # write a function generate offset error as described in the paper
 def error_offset(x_offset, y_offset, fixations):
     '''creates error to move fixations (shift in dissertation)'''
-    
+
+
     pass
 
 

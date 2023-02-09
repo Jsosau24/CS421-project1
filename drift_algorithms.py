@@ -149,3 +149,192 @@ def dynamic_time_warping(sequence1, sequence2):
 			j -= 1
 	dtw_path[0].append(0)
 	return dtw_cost[-1, -1], dtw_path
+
+#added the rest of the functions
+
+######################################################################
+# This code was obtained from: https://github.com/jwcarr/drift/blob/master/code/algorithms.py
+######################################################################
+
+#cluster function
+def cluster(fixation_XY, line_Y, return_line_assignments=False):
+	m = len(line_Y)
+	fixation_Y = fixation_XY[:, 1].reshape(-1, 1)
+	clusters = KMeans(m, n_init=100, max_iter=300).fit_predict(fixation_Y)
+	centers = [fixation_Y[clusters == i].mean() for i in range(m)]
+	ordered_cluster_indices = np.argsort(centers)
+	######################### FOR SIMULATIONS #########################
+	if return_line_assignments:
+		line_assignments = []
+		for fixation_i, cluster_i in enumerate(clusters):
+			line_i = np.where(ordered_cluster_indices == cluster_i)[0][0]
+			line_assignments.append(line_i)
+		return np.array(line_assignments, dtype=int)
+	###################################################################
+	for fixation_i, cluster_i in enumerate(clusters):
+		line_i = np.where(ordered_cluster_indices == cluster_i)[0][0]
+		fixation_XY[fixation_i, 1] = line_Y[line_i]
+	return fixation_XY
+
+#compare function
+def compare(fixation_XY, line_Y, word_XY, x_thresh=512, n_nearest_lines=3, return_line_assignments=False):
+	n = len(fixation_XY)
+	diff_X = np.diff(fixation_XY[:, 0])
+	end_line_indices = list(np.where(diff_X < -x_thresh)[0] + 1)
+	end_line_indices.append(n)
+	line_assignments = []
+	start_of_line = 0
+	for end_of_line in end_line_indices:
+		gaze_line = fixation_XY[start_of_line:end_of_line]
+		mean_y = np.mean(gaze_line[:, 1])
+		lines_ordered_by_proximity = np.argsort(abs(line_Y - mean_y))
+		nearest_line_I = lines_ordered_by_proximity[:n_nearest_lines]
+		line_costs = np.zeros(n_nearest_lines)
+		text_lines = []
+		warping_paths = []
+		for candidate_i in range(n_nearest_lines):
+			candidate_line_i = nearest_line_I[candidate_i]
+			text_line = word_XY[word_XY[:, 1] == line_Y[candidate_line_i]]
+			dtw_cost, warping_path = dynamic_time_warping(gaze_line[:, 0:1], text_line[:, 0:1])
+			line_costs[candidate_i] = dtw_cost
+			text_lines.append(text_line)
+			warping_paths.append(warping_path)
+		line_i = nearest_line_I[np.argmin(line_costs)]
+		if return_line_assignments:
+			line_assignments.extend( [line_i] * (end_of_line - start_of_line) )
+		fixation_XY[start_of_line:end_of_line, 1] = line_Y[line_i]
+		start_of_line = end_of_line
+	######################### FOR SIMULATIONS #########################
+	if return_line_assignments:
+		return np.array(line_assignments, dtype=int)
+	###################################################################
+	return fixation_XY
+
+#Merge method
+#helper variable for the function
+phases = [{'min_i':3, 'min_j':3, 'no_constraints':False},
+          {'min_i':1, 'min_j':3, 'no_constraints':False},
+          {'min_i':1, 'min_j':1, 'no_constraints':False},
+          {'min_i':1, 'min_j':1, 'no_constraints':True}]
+
+def merge(fixation_XY, line_Y, y_thresh=32, g_thresh=0.1, e_thresh=20, return_line_assignments=False):
+	n = len(fixation_XY)
+	m = len(line_Y)
+	diff_X = np.diff(fixation_XY[:, 0])
+	dist_Y = abs(np.diff(fixation_XY[:, 1]))
+	sequence_boundaries = list(np.where(np.logical_or(diff_X < 0, dist_Y > y_thresh))[0] + 1)
+	sequences = [list(range(start, end)) for start, end in zip([0]+sequence_boundaries, sequence_boundaries+[n])]
+	for phase in phases:
+		while len(sequences) > m:
+			best_merger = None
+			best_error = np.inf
+			for i in range(len(sequences)):
+				if len(sequences[i]) < phase['min_i']:
+					continue
+				for j in range(i+1, len(sequences)):
+					if len(sequences[j]) < phase['min_j']:
+						continue
+					candidate_XY = fixation_XY[sequences[i] + sequences[j]]
+					gradient, intercept = np.polyfit(candidate_XY[:, 0], candidate_XY[:, 1], 1)
+					residuals = candidate_XY[:, 1] - (gradient * candidate_XY[:, 0] + intercept)
+					error = np.sqrt(sum(residuals**2) / len(candidate_XY))
+					if phase['no_constraints'] or (abs(gradient) < g_thresh and error < e_thresh):
+						if error < best_error:
+							best_merger = (i, j)
+							best_error = error
+			if not best_merger:
+				break
+			merge_i, merge_j = best_merger
+			merged_sequence = sequences[merge_i] + sequences[merge_j]
+			sequences.append(merged_sequence)
+			del sequences[merge_j], sequences[merge_i]
+	mean_Y = [fixation_XY[sequence, 1].mean() for sequence in sequences]
+	ordered_sequence_indices = np.argsort(mean_Y)
+	######################### FOR SIMULATIONS #########################
+	if return_line_assignments:
+		line_assignments = []
+		for line_i, sequence_i in enumerate(ordered_sequence_indices):
+			line_assignments.extend( [line_i] * len(sequences[sequence_i]) )
+		return np.array(line_assignments, dtype=int)
+	###################################################################
+	for line_i, sequence_i in enumerate(ordered_sequence_indices):
+		fixation_XY[sequences[sequence_i], 1] = line_Y[line_i]
+	return fixation_XY
+
+#segment function
+def segment(fixation_XY, line_Y, return_line_assignments=False):
+	n = len(fixation_XY)
+	m = len(line_Y)
+	diff_X = np.diff(fixation_XY[:, 0])
+	saccades_ordered_by_length = np.argsort(diff_X)
+	line_change_indices = saccades_ordered_by_length[:m-1]
+	current_line_i = 0
+	######################### FOR SIMULATIONS #########################
+	if return_line_assignments:
+		line_assignments = []
+		for fixation_i in range(n):
+			line_assignments.append(current_line_i)
+			if fixation_i in line_change_indices:
+				current_line_i += 1
+		return np.array(line_assignments, dtype=int)
+	###################################################################
+	for fixation_i in range(n):
+		fixation_XY[fixation_i, 1] = line_Y[current_line_i]
+		if fixation_i in line_change_indices:
+			current_line_i += 1
+	return fixation_XY
+
+#split function
+def split(fixation_XY, line_Y, return_line_assignments=False):
+	n = len(fixation_XY)
+	diff_X = np.diff(fixation_XY[:, 0])
+	clusters = KMeans(2, n_init=10, max_iter=300).fit_predict(diff_X.reshape(-1, 1))
+	centers = [diff_X[clusters == 0].mean(), diff_X[clusters == 1].mean()]
+	sweep_marker = np.argmin(centers)
+	end_line_indices = list(np.where(clusters == sweep_marker)[0] + 1)
+	end_line_indices.append(n)
+	start_of_line = 0
+	######################### FOR SIMULATIONS #########################
+	if return_line_assignments:
+		line_assignments = []
+		for end_of_line in end_line_indices:
+			mean_y = np.mean(fixation_XY[start_of_line:end_of_line, 1])
+			line_i = np.argmin(abs(line_Y - mean_y))
+			line_assignments.extend( [line_i] * (end_of_line - start_of_line) )
+			start_of_line = end_of_line
+		return np.array(line_assignments, dtype=int)
+	###################################################################
+	for end_of_line in end_line_indices:
+		mean_y = np.mean(fixation_XY[start_of_line:end_of_line, 1])
+		line_i = np.argmin(abs(line_Y - mean_y))
+		fixation_XY[start_of_line:end_of_line, 1] = line_Y[line_i]
+		start_of_line = end_of_line
+	return 
+
+# stretch function
+def stretch(fixation_XY, line_Y, scale_bounds=(0.9, 1.1), offset_bounds=(-50, 50), return_line_assignments=False):
+	n = len(fixation_XY)
+	fixation_Y = fixation_XY[:, 1]
+
+	def fit_lines(params, return_correction=False):
+		candidate_Y = fixation_Y * params[0] + params[1]
+		corrected_Y = np.zeros(n)
+		for fixation_i in range(n):
+			line_i = np.argmin(abs(line_Y - candidate_Y[fixation_i]))
+			corrected_Y[fixation_i] = line_Y[line_i]
+		if return_correction:
+			return corrected_Y
+		return sum(abs(candidate_Y - corrected_Y))
+
+	best_fit = minimize(fit_lines, [1, 0], method='powell', bounds=[scale_bounds, offset_bounds])
+	######################### FOR SIMULATIONS #########################
+	if return_line_assignments:
+		candidate_Y = fixation_Y * best_fit.x[0] + best_fit.x[1]
+		corrected_I = np.zeros(n, dtype=int)
+		for fixation_i in range(n):
+			corrected_I[fixation_i] = np.argmin(abs(line_Y - candidate_Y[fixation_i]))
+		return corrected_I
+	###################################################################
+	fixation_XY[:, 1] = fit_lines(best_fit.x, return_correction=True)
+	return fixation_XY
+
