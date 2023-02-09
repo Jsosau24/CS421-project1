@@ -73,7 +73,7 @@ def warp_correction(data, word_centers, aoi, robot_data):
     Parameters
     ------------------------------
     data: data with the error
-    line_ys: y = y coordinates for each line
+    word centers: xy coordinates for the word centers
     aoi: areas of interest
     robot_data: gets the data from the robot
     '''
@@ -86,6 +86,25 @@ def warp_correction(data, word_centers, aoi, robot_data):
     percentage, match_list = correction.correction_quality(aoi, robot_data.copy(), warp_correction)
     
     return percentage, warp_correction, match_list
+
+def cluster_correction(data, line_ys, aoi, robot_data):
+    '''
+    corrects the data with the noise using the regress algorithm
+
+    Parameters
+    ------------------------------
+    data: data with the error
+    line_ys: y = y coordinates for each line
+    aoi: areas of interest
+    robot_data: gets the data from the robot
+    '''
+
+    np_array = np.array(data.copy())
+    cluster_correction = algo.cluster(np_array, line_ys)
+    percentage, match_list = correction.correction_quality(aoi, robot_data.copy(), cluster_correction)
+    
+    return percentage
+
 
 
 
