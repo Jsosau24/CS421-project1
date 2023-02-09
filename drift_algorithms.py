@@ -309,7 +309,7 @@ def split(fixation_XY, line_Y, return_line_assignments=False):
 		line_i = np.argmin(abs(line_Y - mean_y))
 		fixation_XY[start_of_line:end_of_line, 1] = line_Y[line_i]
 		start_of_line = end_of_line
-	return 
+	return fixation_XY
 
 # stretch function
 def stretch(fixation_XY, line_Y, scale_bounds=(0.9, 1.1), offset_bounds=(-50, 50), return_line_assignments=False):

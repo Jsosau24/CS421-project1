@@ -48,11 +48,24 @@ def generate_fixations_left_skip_regression(aois_with_tokens):
 
 
 # write a function generate offset error as described in the paper
-def error_offset(x_offset, y_offset, fixations):
-    '''creates error to move fixations (shift in dissertation)'''
+def error_slope(fixations):
+    '''creates error to move fixations (Slope distortion)'''
 
+    results = []
+    
+    for fix in fixations:
 
-    pass
+        x, y, duration = fix[0], fix[1], fix[2]
+
+        # calculates the new y position given the position of x
+        # the bigger the x value bigger the slope
+
+        y = y - ((x - 175) * (-0.2))
+        
+        results.append([x, y, duration])
+
+    
+    return results
 
 
 # noise

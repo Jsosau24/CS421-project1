@@ -142,7 +142,59 @@ def merge_correction(data, line_ys, aoi, robot_data):
 
     return percentage
 
+def segment_correction(data, line_ys, aoi, robot_data):
+    '''
+    corrects the data with the noise using the segment algorithm
 
+    Parameters
+    ------------------------------
+    data: data with the error
+    line_ys: y = y coordinates for each line
+    aoi: areas of interest
+    robot_data: gets the data from the robot
+    '''
+
+    np_array = np.array(data.copy())
+    corrections = algo.segment(np_array, line_ys)
+    percentage, match_list = correction.correction_quality(aoi, robot_data.copy(), corrections)
+
+    return percentage
+
+def split_correction(data, line_ys, aoi, robot_data):
+    '''
+    corrects the data with the noise using the split algorithm
+
+    Parameters
+    ------------------------------
+    data: data with the error
+    line_ys: y = y coordinates for each line
+    aoi: areas of interest
+    robot_data: gets the data from the robot
+    '''
+
+    np_array = np.array(data.copy())
+    corrections = algo.split(np_array, line_ys)
+    percentage, match_list = correction.correction_quality(aoi, robot_data.copy(), corrections)
+
+    return percentage
+
+def stretch_correction(data, line_ys, aoi, robot_data):
+    '''
+    corrects the data with the noise using the stretch algorithm
+
+    Parameters
+    ------------------------------
+    data: data with the error
+    line_ys: y = y coordinates for each line
+    aoi: areas of interest
+    robot_data: gets the data from the robot
+    '''
+
+    np_array = np.array(data.copy())
+    corrections = algo.stretch(np_array, line_ys)
+    percentage, match_list = correction.correction_quality(aoi, robot_data.copy(), corrections)
+
+    return percentage
 
 
 
