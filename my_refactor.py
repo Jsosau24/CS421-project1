@@ -73,7 +73,7 @@ def warp_correction(data, word_centers, aoi, robot_data):
     Parameters
     ------------------------------
     data: data with the error
-    word centers: xy coordinates for the word centers
+    word_centers: xy coordinates for the word centers
     aoi: areas of interest
     robot_data: gets the data from the robot
     '''
@@ -102,7 +102,44 @@ def cluster_correction(data, line_ys, aoi, robot_data):
     np_array = np.array(data.copy())
     cluster_correction = algo.cluster(np_array, line_ys)
     percentage, match_list = correction.correction_quality(aoi, robot_data.copy(), cluster_correction)
+
+    return percentage
+
+def compare_correction(data, line_ys, word_centers, aoi, robot_data):
+    '''
+    corrects the data with the noise using the compare algorithm
+
+    Parameters
+    ------------------------------
+    data: data with the error
+    line_ys: y = y coordinates for each line
+    word_centers: xy coordinates for the word centers
+    aoi: areas of interest
+    robot_data: gets the data from the robot
+    '''
+
+    np_array = np.array(data.copy())
+    cluster_correction = algo.compare(np_array, line_ys, word_centers)
+    percentage, match_list = correction.correction_quality(aoi, robot_data.copy(), cluster_correction)
     
+    return percentage
+
+def merge_correction(data, line_ys, aoi, robot_data):
+    '''
+    corrects the data with the noise using the merge algorithm
+
+    Parameters
+    ------------------------------
+    data: data with the error
+    line_ys: y = y coordinates for each line
+    aoi: areas of interest
+    robot_data: gets the data from the robot
+    '''
+
+    np_array = np.array(data.copy())
+    corrections = algo.merge(np_array, line_ys)
+    percentage, match_list = correction.correction_quality(aoi, robot_data.copy(), corrections)
+
     return percentage
 
 
