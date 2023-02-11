@@ -25,10 +25,10 @@ def attach_correction(data, line_ys, aoi, robot_data):
     '''
 
     np_array = np.array(data.copy())
-    attach_correction = algo.attach(np_array, line_ys)
-    percentage, match_list = correction.correction_quality(aoi, robot_data.copy(), attach_correction)
+    corrections = algo.attach(np_array, line_ys)
+    percentage, match_list = correction.correction_quality(aoi, robot_data.copy(), corrections)
 
-    return percentage
+    return percentage, corrections, match_list
 
 def chain_correction(data, line_ys, aoi, robot_data):
     '''
@@ -43,10 +43,10 @@ def chain_correction(data, line_ys, aoi, robot_data):
     '''
 
     np_array = np.array(data.copy())
-    chain_correction = algo.chain(np_array, line_ys)
-    percentage, match_list = correction.correction_quality(aoi, robot_data.copy(), chain_correction)
+    corrections = algo.chain(np_array, line_ys)
+    percentage, match_list = correction.correction_quality(aoi, robot_data.copy(), corrections)
 
-    return percentage
+    return percentage, corrections, match_list
 
 def regress_correction(data, line_ys, aoi, robot_data):
     '''
@@ -61,10 +61,10 @@ def regress_correction(data, line_ys, aoi, robot_data):
     '''
 
     np_array = np.array(data.copy())
-    regress_correction = algo.regress(np_array, line_ys)
-    percentage, match_list = correction.correction_quality(aoi, robot_data.copy(), regress_correction)
+    corrections = algo.regress(np_array, line_ys)
+    percentage, match_list = correction.correction_quality(aoi, robot_data.copy(), corrections)
 
-    return percentage
+    return percentage, corrections, match_list
 
 def warp_correction(data, word_centers, aoi, robot_data):
     '''
@@ -82,10 +82,10 @@ def warp_correction(data, word_centers, aoi, robot_data):
     durations = np.delete(durations, 0, 1)
     np_array = np.delete(np_array, 2, 1)
         
-    warp_correction = algo.warp(np_array, word_centers)
-    percentage, match_list = correction.correction_quality(aoi, robot_data.copy(), warp_correction)
+    corrections = algo.warp(np_array, word_centers)
+    percentage, match_list = correction.correction_quality(aoi, robot_data.copy(), corrections)
     
-    return percentage, warp_correction, match_list
+    return percentage, corrections, match_list
 
 def cluster_correction(data, line_ys, aoi, robot_data):
     '''
@@ -100,10 +100,10 @@ def cluster_correction(data, line_ys, aoi, robot_data):
     '''
 
     np_array = np.array(data.copy())
-    cluster_correction = algo.cluster(np_array, line_ys)
-    percentage, match_list = correction.correction_quality(aoi, robot_data.copy(), cluster_correction)
+    corrections = algo.cluster(np_array, line_ys)
+    percentage, match_list = correction.correction_quality(aoi, robot_data.copy(), corrections)
 
-    return percentage
+    return percentage, corrections, match_list
 
 def compare_correction(data, line_ys, word_centers, aoi, robot_data):
     '''
@@ -119,10 +119,10 @@ def compare_correction(data, line_ys, word_centers, aoi, robot_data):
     '''
 
     np_array = np.array(data.copy())
-    cluster_correction = algo.compare(np_array, line_ys, word_centers)
-    percentage, match_list = correction.correction_quality(aoi, robot_data.copy(), cluster_correction)
+    corrections = algo.compare(np_array, line_ys, word_centers)
+    percentage, match_list = correction.correction_quality(aoi, robot_data.copy(), corrections)
     
-    return percentage
+    return percentage, corrections, match_list
 
 def merge_correction(data, line_ys, aoi, robot_data):
     '''
@@ -140,7 +140,7 @@ def merge_correction(data, line_ys, aoi, robot_data):
     corrections = algo.merge(np_array, line_ys)
     percentage, match_list = correction.correction_quality(aoi, robot_data.copy(), corrections)
 
-    return percentage
+    return percentage, corrections, match_list
 
 def segment_correction(data, line_ys, aoi, robot_data):
     '''
@@ -158,7 +158,7 @@ def segment_correction(data, line_ys, aoi, robot_data):
     corrections = algo.segment(np_array, line_ys)
     percentage, match_list = correction.correction_quality(aoi, robot_data.copy(), corrections)
 
-    return percentage
+    return percentage, corrections, match_list
 
 def split_correction(data, line_ys, aoi, robot_data):
     '''
@@ -176,7 +176,7 @@ def split_correction(data, line_ys, aoi, robot_data):
     corrections = algo.split(np_array, line_ys)
     percentage, match_list = correction.correction_quality(aoi, robot_data.copy(), corrections)
 
-    return percentage
+    return percentage, corrections, match_list
 
 def stretch_correction(data, line_ys, aoi, robot_data):
     '''
@@ -194,7 +194,7 @@ def stretch_correction(data, line_ys, aoi, robot_data):
     corrections = algo.stretch(np_array, line_ys)
     percentage, match_list = correction.correction_quality(aoi, robot_data.copy(), corrections)
 
-    return percentage
+    return percentage, corrections, match_list
 
 
 

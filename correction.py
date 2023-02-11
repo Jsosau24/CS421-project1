@@ -46,9 +46,10 @@ def generate_fixations_left_skip_regression(aois_with_tokens):
     
     return fixations
 
+import random
 
 # write a function generate offset error as described in the paper
-def error_slope(fixations):
+def error_slope(fixations, error_probability):
     '''creates error to move fixations (Slope distortion)'''
 
     results = []
@@ -57,19 +58,22 @@ def error_slope(fixations):
 
         x, y, duration = fix[0], fix[1], fix[2]
 
-        # calculates the new y position given the position of x
-        # the bigger the x value bigger the slope
+        if random.random() < error_probability:
 
-        y = y - ((x - 175) * (-0.2))
+            # moves the y point by y*-.1
+            y = y - ((y) * (-0.1))
+            results.append([x, y, duration])
+
+        else:
+
+            results.append([x, y, duration])
         
-        results.append([x, y, duration])
-
+        
     
     return results
 
 
 # noise
-import random
 
 def error_noise(y_noise_probability, y_noise, duration_noise, fixations):
     '''creates a random error moving a percentage of fixations '''
@@ -96,10 +100,30 @@ def error_noise(y_noise_probability, y_noise, duration_noise, fixations):
     return results
 
 # shift
+def error_shift(fixations, error_probability):
+    '''creates error to move fixations (Slope distortion)'''
 
+    results = []
+    
+    for fix in fixations:
 
+        x, y, duration = fix[0], fix[1], fix[2]
 
-# droop
+        if random.random() < error_probability:
+
+            # shifts the y values by y*(-.2) 
+            shift = y*(-.2)
+            y = y - shift
+
+            results.append([x, y, duration])
+
+        else:
+            results.append([x, y, duration])
+    
+    return results
+
+#within the line regression
+
 
 from PIL import ImageFont, ImageDraw, Image
 from matplotlib import pyplot as plt
