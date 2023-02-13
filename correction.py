@@ -68,10 +68,7 @@ def error_slope(fixations, error_probability):
 
             results.append([x, y, duration])
         
-        
-    
     return results
-
 
 # noise
 
@@ -122,9 +119,72 @@ def error_shift(fixations, error_probability):
     
     return results
 
+import my_refactor as r
+
 #within the line regression
+def error_within_line(fixations, error_probability, line_ys):
+    ''' creates an error that creates new fixations that moves arround the x axis'''
 
+    results = []
+    x_values_line = r.get_x_fixations_per_line(fixations, line_ys)
 
+    for fix in fixations:
+
+        x, y, duration = fix[0], fix[1], fix[2]
+
+        #checks for the error probability
+        if random.random() < error_probability:
+
+            #finds the line we are are on
+            for i in range(len(line_ys)):
+                if ((line_ys[i]-25) <= y <= (line_ys[i]+25) ):
+                    #obtains a random x value of another fixation
+                    new_x = x_values_line[i][(random.randint(0,len(x_values_line[i])-1))]
+                    break
+            
+            # adds the error and the original fixation
+            results.append([new_x, y, duration])
+            results.append([x, y, duration])
+
+        else:
+            results.append([x, y, duration])
+    
+    return results
+
+#between line regression
+def error_between_line(fixations, error_probability,line_ys):
+    ''' creates an error that creates new fixations in a different line'''
+    
+    results = []
+    x_values_line = r.get_x_fixations_per_line(fixations, line_ys)
+
+    for fix in fixations:
+
+        x, y, duration = fix[0], fix[1], fix[2]
+
+        #checks for the error probability
+        if random.random() < error_probability:
+
+            #finds the line we are are on
+            for i in range(len(line_ys)):
+                if ((line_ys[i]-25) <= y <= (line_ys[i]+25) ):
+
+                    if random.randint(1,2) == 1:
+                        line = random.randint(0,len(line_ys)-1)
+                        new_y = line_ys[line]
+                        new_x = x_values_line[i][(random.randint(0,len(x_values_line[i])-1))]
+
+                        # adds the error and the original fixation
+                        results.append([new_x, new_y, duration])
+                        results.append([x, y, duration])
+
+                    break
+
+        else:
+            results.append([x, y, duration])
+    
+    return results
+    
 from PIL import ImageFont, ImageDraw, Image
 from matplotlib import pyplot as plt
 import numpy as np

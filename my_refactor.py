@@ -196,6 +196,30 @@ def stretch_correction(data, line_ys, aoi, robot_data):
 
     return percentage, corrections, match_list
 
+def get_x_fixations_per_line (fixations, line_ys):
+    '''returns a 2d array with the fixations in x per line'''
+
+    x_fix = []
+
+    for i in range(len(line_ys)):
+        x_fix.append([])
+
+    for fix in fixations:
+        
+        x, y= fix[0], fix[1]
+
+        for i in range(len(line_ys)):
+            if ((line_ys[i]-25) <= y <= (line_ys[i]+25) ):
+                x_fix[i].append(y)
+                break
+
+    return x_fix
+
+        
+
+
+
+
 
 
 
