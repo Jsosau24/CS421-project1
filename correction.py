@@ -169,6 +169,10 @@ def error_between_line(fixations, error_probability,line_ys):
             for i in range(len(line_ys)):
                 if ((line_ys[i]-25) <= y <= (line_ys[i]+25) ):
 
+                    
+                        
+
+
                     if random.randint(1,2) == 1:
                         line = random.randint(0,len(line_ys)-1)
                         new_y = line_ys[line]

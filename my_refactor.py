@@ -210,7 +210,7 @@ def get_x_fixations_per_line (fixations, line_ys):
 
         for i in range(len(line_ys)):
             if ((line_ys[i]-25) <= y <= (line_ys[i]+25) ):
-                x_fix[i].append(y)
+                x_fix[i].append(x)
                 break
 
     return x_fix
