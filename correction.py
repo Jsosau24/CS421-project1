@@ -53,6 +53,7 @@ def error_slope(fixations, error_probability):
     '''creates error to move fixations (Slope distortion)'''
 
     results = []
+    x0 = fixations[0][0]
     
     for fix in fixations:
 
@@ -61,7 +62,7 @@ def error_slope(fixations, error_probability):
         if random.random() < error_probability:
 
             # moves the y point by y*-.1
-            y = y - ((y) * (-0.1))
+            y = y - ((x-x0) * (-0.07))
             results.append([x, y, duration])
 
         else:
@@ -109,7 +110,7 @@ def error_shift(fixations, error_probability):
         if random.random() < error_probability:
 
             # shifts the y values by y*(-.2) 
-            shift = y*(-.2)
+            shift = y*(-.1)
             y = y - shift
 
             results.append([x, y, duration])
@@ -133,7 +134,7 @@ def error_within_line(fixations, error_probability, line_ys):
         x, y, duration = fix[0], fix[1], fix[2]
 
         #checks for the error probability
-        if random.random() < error_probability:
+        if random.random() < error_probability/1.5:
 
             #finds the line we are are on
             for i in range(len(line_ys)):
@@ -163,7 +164,7 @@ def error_between_line(fixations, error_probability,line_ys):
         x, y, duration = fix[0], fix[1], fix[2]
 
         #checks for the error probability
-        if random.random() < error_probability:
+        if random.random() < error_probability/4:
 
             #finds the line we are are on
             for i in range(len(line_ys)):
@@ -171,7 +172,7 @@ def error_between_line(fixations, error_probability,line_ys):
 
                     line = random.randint(0,len(line_ys)-1)
                     new_y = line_ys[line]
-                    new_x = x_values_line[i][(random.randint(0,len(x_values_line[i])-1))]
+                    new_x = x_values_line[line][(random.randint(0,(len(x_values_line[line])-1)))]
 
                     # adds the error and the original fixation
                     results.append([new_x, new_y, duration])
