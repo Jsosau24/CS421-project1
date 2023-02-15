@@ -134,7 +134,7 @@ def error_within_line(fixations, error_probability, line_ys):
         x, y, duration = fix[0], fix[1], fix[2]
 
         #checks for the error probability
-        if random.random() < error_probability/1.5:
+        if random.random() < error_probability/2:
 
             #finds the line we are are on
             for i in range(len(line_ys)):
